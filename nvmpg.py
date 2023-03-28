@@ -4,6 +4,7 @@
 # loadusr -Wn nvmpg-usb /home/martin/nvmpg
 # https://www.amazon.com/USB-Serial-Adapter-Prolific-Retention/dp/B000HVHDJ8
 # http://www.oz1jhm.dk/content/linuxcnc-and-arduino
+# WARNING this is ugly I do not do Python
 
 import os, sys
 import serial
