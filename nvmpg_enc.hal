@@ -1,0 +1,64 @@
+loadusr -Wn nvmpg /home/martin/linuxcnc/configs/xyz_mill/nvmpg.py
+
+setp nvmpg.mpg-x1-inc 0.001
+
+net joint-1-pos-fb <= hm2_7i92.0.encoder.01.position
+
+loadrt mux4 count=1
+
+addf mux4.0 servo-thread
+
+loadrt ilowpass
+addf ilowpass.0 servo-thread
+
+setp ilowpass.0.scale 1000
+setp ilowpass.0.gain 0.01
+
+# Overrides
+net mpg-rapid-override nvmpg.rapid-override halui.rapid-override.value
+net mpg-spindle-override nvmpg.spindle-override halui.spindle.0.override.value
+net mpg-feed-override nvmpg.feed-override halui.feed-override.value
+
+# Spindle
+
+net spindle-rpm nvmpg.spindle-rpm <= spindle.0.speed-out-abs
+
+
+# postion
+net mpg-xpos halui.axis.x.pos-relative => nvmpg.x-pos
+net mpg-ypos halui.axis.y.pos-relative => nvmpg.y-pos
+net mpg-zpos halui.axis.z.pos-relative => nvmpg.z-pos
+#net mpg-apos halui.axis.a.pos-relative => nvmpg.a-pos
+
+
+# For velocity mode, set to 1
+# In velocity mode the axis stops when the dial is stopped
+# even if that means the commanded motion is not completed,
+# For position mode (the default), set to 0
+# In position mode the axis will move exactly jog-scale
+# units for each count, regardless of how long that might take,
+setp axis.x.jog-vel-mode 0
+setp axis.y.jog-vel-mode 0
+setp axis.z.jog-vel-mode 0
+
+
+# The output from encoder counts is sent to ilowpass
+net mpg-out ilowpass.0.in <= hm2_7i92.0.encoder.02.count
+
+# The output from the mux4 is sent to each axis jog scale
+net mpg-scale <= nvmpg.mpg-scale
+net mpg-scale => axis.x.jog-scale
+net mpg-scale => axis.y.jog-scale
+net mpg-scale => axis.z.jog-scale
+
+# The Axis select inputs
+net mpg-x axis.x.jog-enable <= nvmpg.x-select
+net mpg-y axis.y.jog-enable <= nvmpg.y-select
+net mpg-z axis.z.jog-enable <= nvmpg.z-select
+
+# The output from the ilowpass is sent to each axis jog count
+# Only the selected axis will move.
+net encoder-counts  <= ilowpass.0.out #hm2_7i92.0.encoder.02.count
+net encoder-counts => axis.x.jog-counts
+net encoder-counts => axis.y.jog-counts
+net encoder-counts => axis.z.jog-counts

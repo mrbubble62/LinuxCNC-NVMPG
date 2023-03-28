@@ -1,0 +1,302 @@
+
+
+# kinematics
+loadrt [KINS](KINEMATICS)
+
+# motion controller
+loadrt [EMCMOT](EMCMOT) servo_period_nsec=[EMCMOT](SERVO_PERIOD) num_joints=[KINS](JOINTS)
+
+# standard components
+loadrt pid num_chan=3
+loadrt and2
+loadrt estop_latch count=3 
+loadrt oneshot
+loadrt timedelay
+
+# hostmot2 driver
+loadrt hostmot2
+
+loadrt [HM2](DRIVER) board_ip=[HM2](IPADDRESS) config="sserial_port_0=30020 num_encoders=5 num_pwmgens=1 num_stepgens=2"
+
+#setp hm2_7i92.0.watchdog.timeout_ns 5000000
+
+# THREADS
+addf hm2_7i92.0.read servo-thread
+addf motion-command-handler servo-thread
+addf and2.0 servo-thread
+addf motion-controller servo-thread
+addf pid.0.do-pid-calcs servo-thread
+addf pid.1.do-pid-calcs servo-thread
+addf pid.2.do-pid-calcs servo-thread
+addf hm2_7i92.0.write servo-thread
+addf estop-latch.0            servo-thread
+addf estop-latch.1            servo-thread
+addf estop-latch.2            servo-thread
+
+# DPLL TIMER
+setp hm2_7i92.0.dpll.01.timer-us -50
+setp hm2_7i92.0.stepgen.timer-number 1
+setp hm2_7i92.0.encoder.timer-number 1
+
+
+# X 
+# PID Setup
+setp pid.0.Pgain [JOINT_0](P)
+setp pid.0.Igain [JOINT_0](I)
+setp pid.0.Dgain [JOINT_0](D)
+setp pid.0.bias [JOINT_0](BIAS)
+setp pid.0.FF0 [JOINT_0](FF0)
+setp pid.0.FF1 [JOINT_0](FF1)
+setp pid.0.FF2 [JOINT_0](FF2)
+setp pid.0.deadband [JOINT_0](DEADBAND)
+setp pid.0.maxoutput [JOINT_0](MAX_OUTPUT)
+setp pid.0.maxerror [JOINT_0](MAX_ERROR)
+#setp pid.0.error-previous-target true
+
+
+# PWM setup
+setp hm2_7i92.0.7i77.0.1.analogout0-scalemax [JOINT_0](ANALOG_SCALE_MAX)
+setp hm2_7i92.0.7i77.0.1.analogout0-minlim [JOINT_0](ANALOG_MIN_LIMIT)
+setp hm2_7i92.0.7i77.0.1.analogout0-maxlim [JOINT_0](ANALOG_MAX_LIMIT)
+
+
+# Encoder Setup
+setp hm2_7i92.0.encoder.00.scale [JOINT_0](ENCODER_SCALE)
+setp hm2_7i92.0.encoder.00.counter-mode 0
+setp hm2_7i92.0.encoder.00.filter 1
+setp hm2_7i92.0.encoder.00.index-invert 0
+setp hm2_7i92.0.encoder.00.index-mask 0
+setp hm2_7i92.0.encoder.00.index-mask-invert 0
+
+
+# Position Command and Feedback
+net joint-0-pos-fb <= hm2_7i92.0.encoder.00.position
+net joint-0-pos-fb => joint.0.motor-pos-fb
+#net joint-0-vel-fb <=  hm2_7i92.0.encoder.00.velocity
+net joint-0-pos-rawcounts <=  hm2_7i92.0.encoder.00.rawcounts
+net joint-0-output => hm2_7i92.0.7i77.0.1.analogout0
+net joint-0-pos-cmd <= joint.0.motor-pos-cmd
+net joint-0-pos-cmd       =>  pid.0.command
+net joint-0-pos-fb        =>  pid.0.feedback
+net joint-0-output        <=  pid.0.output
+
+# --- X-ENABLE ---
+net joint-0-index-enable <=> pid.0.index-enable
+net joint-0-index-enable  joint.0.index-enable  <=>  hm2_7i92.0.encoder.00.index-enable
+
+net joint-0-enable <= joint.0.amp-enable-out
+net joint-0-enable => pid.0.enable
+net joint-0-enable => hm2_7i92.0.7i77.0.1.analogena
+net joint-0-enable => hm2_7i92.0.7i77.0.0.output-13 # servo CCW
+net joint-1-enable => hm2_7i92.0.7i77.0.0.output-10 # servo CCW
+
+
+# Y  
+# PID Setup
+setp pid.1.Pgain [JOINT_1](P)
+setp pid.1.Igain [JOINT_1](I)
+setp pid.1.Dgain [JOINT_1](D)
+setp pid.1.bias [JOINT_1](BIAS)
+setp pid.1.FF0 [JOINT_1](FF0)
+setp pid.1.FF1 [JOINT_1](FF1)
+setp pid.1.FF2 [JOINT_1](FF2)
+setp pid.1.deadband [JOINT_1](DEADBAND)
+setp pid.1.maxoutput [JOINT_1](MAX_OUTPUT)
+setp pid.1.maxerror [JOINT_1](MAX_ERROR)
+setp pid.1.error-previous-target true
+
+# PWM setup - NOTE analog1 is broken
+setp hm2_7i92.0.7i77.0.1.analogout2-scalemax [JOINT_1](ANALOG_SCALE_MAX)
+setp hm2_7i92.0.7i77.0.1.analogout2-minlim [JOINT_1](ANALOG_MIN_LIMIT)
+setp hm2_7i92.0.7i77.0.1.analogout2-maxlim [JOINT_1](ANALOG_MAX_LIMIT)
+net joint-1-output => hm2_7i92.0.7i77.0.1.analogout2
+
+# Encoder Setup
+setp hm2_7i92.0.encoder.01.scale  [JOINT_1](ENCODER_SCALE)
+setp hm2_7i92.0.encoder.01.counter-mode 0
+setp hm2_7i92.0.encoder.01.filter 1
+setp hm2_7i92.0.encoder.01.index-invert 0
+setp hm2_7i92.0.encoder.01.index-mask 0
+setp hm2_7i92.0.encoder.01.index-mask-invert 0
+
+# Position Command and Feedback
+net joint-1-pos-fb <= hm2_7i92.0.encoder.01.position
+net joint-1-pos-fb => joint.1.motor-pos-fb
+net joint-1-pos-cmd <= joint.1.motor-pos-cmd
+net joint-1-pos-rawcounts <=  hm2_7i92.0.encoder.01.rawcounts
+net joint-1-pos-cmd       =>  pid.1.command
+net joint-1-pos-fb        =>  pid.1.feedback
+net joint-1-output        <=  pid.1.output
+
+
+# --- Y-ENABLE ---
+net joint-1-index-enable  joint.1.index-enable  hm2_7i92.0.encoder.01.index-enable
+net joint-1-index-enable <=> pid.1.index-enable
+net joint-1-enable <= joint.1.amp-enable-out
+net joint-1-enable => pid.1.enable
+
+
+
+
+
+# Z 
+# Joint 2
+# PID Setup
+setp pid.2.Pgain [JOINT_2](P)
+setp pid.2.Igain [JOINT_2](I)
+setp pid.2.Dgain [JOINT_2](D)
+setp pid.2.bias [JOINT_2](BIAS)
+setp pid.2.FF0 [JOINT_2](FF0)
+setp pid.2.FF1 [JOINT_2](FF1)
+setp pid.2.FF2 [JOINT_2](FF2)
+setp pid.2.deadband [JOINT_2](DEADBAND)
+setp pid.2.maxoutput [JOINT_2](MAX_OUTPUT)
+setp pid.2.maxerror [JOINT_2](MAX_ERROR)
+setp pid.2.error-previous-target true
+
+# joint enable chain
+net joint-2-index-enable <=> pid.2.index-enable
+net joint-2-enable <= joint.2.amp-enable-out
+net joint-2-enable => pid.2.enable
+
+net joint-2-enable => hm2_[MESA](BOARD).0.stepgen.00.enable
+
+setp hm2_[MESA](BOARD).0.stepgen.00.dirsetup [JOINT_2](DIRSETUP)
+setp hm2_[MESA](BOARD).0.stepgen.00.dirhold [JOINT_2](DIRHOLD)
+setp hm2_[MESA](BOARD).0.stepgen.00.steplen [JOINT_2](STEPLEN)
+setp hm2_[MESA](BOARD).0.stepgen.00.stepspace [JOINT_2](STEPSPACE)
+setp hm2_[MESA](BOARD).0.stepgen.00.position-scale [JOINT_2](SCALE)
+setp hm2_[MESA](BOARD).0.stepgen.00.maxvel [JOINT_2](STEPGEN_MAXVEL)
+setp hm2_[MESA](BOARD).0.stepgen.00.maxaccel [JOINT_2](STEPGEN_MAXACCEL)
+setp hm2_[MESA](BOARD).0.stepgen.00.step_type 0
+setp hm2_[MESA](BOARD).0.stepgen.00.control-type 1
+
+# position command and feedback
+net joint-2-pos-cmd <= joint.2.motor-pos-cmd
+net joint-2-pos-cmd => pid.2.command
+
+net joint-2-pos-fb <= hm2_[MESA](BOARD).0.stepgen.00.position-fb
+net joint-2-pos-fb => joint.2.motor-pos-fb
+net joint-2-pos-fb => pid.2.feedback
+
+net joint.2.output <= pid.2.output
+net joint.2.output => hm2_[MESA](BOARD).0.stepgen.00.velocity-cmd
+# END Z
+
+
+# Spindle
+
+# Spindle Velocity Pins
+net spindle-vel-cmd-rps <=  spindle.0.speed-out-rps
+net spindle-vel-cmd-rps-abs <= spindle.0.speed-out-rps-abs
+net spindle-vel-cmd-rpm <= spindle.0.speed-out
+
+# Spindle Command Pins
+net spindle-on <= spindle.0.on
+net spindle-cw <= spindle.0.forward
+
+# Set spindle at speed signal
+net spindle-at-speed <= spindle.0.at-speed <= hm2_7i92.0.7i77.0.0.input-13-not
+
+# Spindle Board Connections
+
+net spindle-vel-cmd-rpm  => hm2_7i92.0.7i77.0.1.analogout5
+net spindle-on     => hm2_7i92.0.7i77.0.1.spinena
+setp hm2_7i92.0.7i77.0.1.analogout5-maxlim 24000
+setp hm2_7i92.0.7i77.0.1.analogout5-minlim 18000
+setp hm2_7i92.0.7i77.0.1.analogout5-scalemax 24000
+
+
+
+# Standard I/O Block - EStop, Etc
+# create a signal for the estop loopback
+
+# iocontrol.0.user-enable-out FALSE when an internal estop condition exists
+# iocontrol.0.user-request-enable TRUE when the user has requested that estop be cleared
+
+# Input FALSE if machine ESTOP activated = hm2_7i92.0.7i77.0.0.input-15
+# Output to machine ESTOP loop FALSE activate ESTOP = hm2_7i92.0.7i77.0.0.output-03 
+
+
+# https://forum.linuxcnc.org/49-basic-configuration/43804-solved-estop-loop-scheme-external-safety-relay
+net AIR_PRESSURE_OK   <=  hm2_7i92.0.7i77.0.0.input-14-not #(air switch)
+net estop-relay-clear          <=    hm2_7i92.0.7i77.0.0.input-15 #(estop relay is-energized 24V)
+
+net AIR_PRESSURE_OK   => and2.0.in0
+net estop-relay-clear          => and2.0.in1
+net estop-clear                 <= and2.0.out
+
+net estop-clear                 =>    iocontrol.0.emc-enable-in
+net estop-out                   <=    iocontrol.0.user-enable-out
+net estop-out                   =>    hm2_7i92.0.7i77.0.0.output-04 #(estop relay coil path to 0V)
+net estop-out  => 	hm2_7i92.0.7i77.0.0.output-14 # x servo estop
+net estop-out  => 	hm2_7i92.0.7i77.0.0.output-11 # y servo estop
+
+
+
+setp oneshot.0.width  2
+setp timedelay.0.off-delay  2
+net estop-clear                => oneshot.0.in
+net machine-on-delay      <=  oneshot.0.out
+net machine-on-delay      =>  timedelay.0.in
+net machine-on-signal     <=  timedelay.0.out
+net machine-on-signal     =>  halui.machine.on
+
+# --- MACHINE-IS-ENABLED ---
+
+
+
+# LIMIT SW
+
+# --- MAX-HOME-Z ---
+net max-home-z     <=   hm2_7i92.0.7i77.0.0.input-03-not
+
+# --- MIN-Z ---
+net min-z     <=  hm2_7i92.0.7i77.0.0.input-04-not
+
+# --- Z HOME / limit switch signals---
+net max-home-z     =>  joint.2.home-sw-in
+net min-z     =>  joint.2.neg-lim-sw-in
+net max-home-z     =>  joint.2.pos-lim-sw-in
+
+#  --- X 
+net x-home joint.0.home-sw-in  <= hm2_7i92.0.7i77.0.0.input-11
+net x-min  joint.0.neg-lim-sw-in   <=  hm2_7i92.0.7i77.0.0.input-09
+net x-max  joint.0.pos-lim-sw-in   <=  hm2_7i92.0.7i77.0.0.input-10
+
+#  --- Y 
+net y-min  joint.1.neg-lim-sw-in   <=  hm2_7i92.0.7i77.0.0.input-06-not
+net y-max-home  joint.1.pos-lim-sw-in   <=  hm2_7i92.0.7i77.0.0.input-07-not 
+net y-max-home  joint.1.home-sw-in 
+
+# END LIMIT SW
+
+#  Manual Tool Change Dialog
+loadusr -W hal_manualtoolchange
+net tool-change-request    =>  hal_manualtoolchange.change
+net tool-change-confirmed  <=  hal_manualtoolchange.changed
+net tool-number            =>  hal_manualtoolchange.number
+
+# create signals for tool loading loopback
+net tool-prep-loop iocontrol.0.tool-prepare => iocontrol.0.tool-prepared
+net tool-change-loop iocontrol.0.tool-change => iocontrol.0.tool-changed
+
+
+#  ---coolant signals---
+
+net coolant-mist      <=  iocontrol.0.coolant-mist
+#net coolant-mist hm2_7i92.0.7i76.0.0.output-04
+
+#  ---probe signal---
+
+
+net probe-in  hm2_7i92.0.7i77.0.0.input-00-not   =>  motion.probe-input
+
+#  ---motion control signals---
+
+net in-position               <=  motion.in-position
+net machine-is-enabled        <=  motion.motion-enabled
+net machine-is-on         halui.machine.is-on
+#net jog-speed             halui.jog-speed
+net MDI-mode              halui.mode.is-mdi
+
