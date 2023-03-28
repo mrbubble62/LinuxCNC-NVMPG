@@ -21,5 +21,4 @@ X,Y Servos; Mitsubishi MR-J3-40A
 Z Stepper DM556T
 
 ### MPG
-NVMPG with USB Serial adapter
-
+Novusun NVMPG RJ45 with USB Serial adapter
