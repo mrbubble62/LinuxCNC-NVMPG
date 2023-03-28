@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# v0.2
+# Borrowed extensivly from https://github.com/scottalford75/Remora-NVEM/tree/main/LinuxCNC/Components/NVMPG
 # the pendant supports 6 axis in this file axis-b abd axis-c are commented out
 # loadusr -Wn nvmpg-usb /home/martin/nvmpg
 # https://www.amazon.com/USB-Serial-Adapter-Prolific-Retention/dp/B000HVHDJ8
