@@ -16,7 +16,7 @@ Intel(R) Atom(TM) x5-Z8350  CPU @ 1.44GHz
 Mesa 7i92T, 7i77, 7i76
 
 #### Drives
-X,Y Servos; Misubishi MR-J3-40A
+X,Y Servos; Mitsubishi MR-J3-40A
 
 Z Stepper DM556T
 
