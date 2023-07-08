@@ -94,7 +94,7 @@ c.newpin("z-select",hal.HAL_BIT,hal.HAL_IO)
 c.newpin("a-select",hal.HAL_BIT,hal.HAL_OUT)
 #c.newpin("b-select",hal.HAL_BIT,hal.HAL_OUT)
 #c.newpin("c-select",hal.HAL_BIT,hal.HAL_OUT)
-c.newpin("mpg-x1-inc",hal.HAL_FLOAT,hal.HAL_IN)
+c.newpin("mpg-jogscale",hal.HAL_FLOAT,hal.HAL_IN)
 c.newpin("mpg-scale",hal.HAL_FLOAT,hal.HAL_OUT)
 time.sleep(1)
 c.ready()
@@ -112,7 +112,8 @@ NVMPGinputs = ""
 selectedAxis = 0
 c['x-select'] = 1; c['y-select'] = 0; c['z-select'] = 0; c['a-select'] = 0
 selectedMultiplier = 2
-c['mpg-scale'] = MPGSCALEx100
+c['mpg-scale'] = MPGSCALEx100 * c['mpg-jogscale']
+              
 
 
 # INPUTS
@@ -362,15 +363,15 @@ try:
         # mulitplier
         if(mpgRxData.hex() == "05"):
             selectedMultiplier += 1
-            if selectedMultiplier > 3: 
+            if selectedMultiplier > 3:
                 selectedMultiplier = 0
-                c['mpg-scale'] = MPGSCALEx1 * c['mpg-x1-inc']
+                c['mpg-scale'] = MPGSCALEx1 * c['mpg-jogscale']
             if selectedMultiplier == 1:
-                c['mpg-scale'] = MPGSCALEx10 * c['mpg-x1-inc']
+                c['mpg-scale'] = MPGSCALEx10 * c['mpg-jogscale']
             if selectedMultiplier == 2:
-                c['mpg-scale'] = MPGSCALEx100 * c['mpg-x1-inc']
+                c['mpg-scale'] = MPGSCALEx100 * c['mpg-jogscale']
             if selectedMultiplier == 3:
-               c['mpg-scale'] = MPGSCALEx1000 * c['mpg-x1-inc']
+               c['mpg-scale'] = MPGSCALEx1000 * c['mpg-jogscale']
             updateFlag = 1
             print(selectedMultiplier)
         
