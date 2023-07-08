@@ -4,7 +4,7 @@
 # Python component deals with serial communication and user space HAL
 loadusr -Wn nvmpg /home/martin/linuxcnc/configs/xyz_mill/nvmpg.py
 
-setp nvmpg.mpg-x1-inc 0.001
+setp nvmpg.mpg-jogscale 0.001
 
 # mux axis together 
 loadrt mux4 count=1
