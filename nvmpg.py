@@ -379,8 +379,8 @@ try:
             if ok_for_mdi() and is_all_homed():
                 cmd.mode(linuxcnc.MODE_MDI)
                 cmd.wait_complete() # wait until mode switch executed
-                cmd.mdi("G0 G53 Z0")
-                cmd.mdi("G0 G53 X400 Y475 Z0")
+                cmd.mdi("G53 Z0")
+                cmd.mdi("G53 X400 Y475 Z0")
                 cmd.wait_complete()
                 cmd.mode(linuxcnc.MODE_MANUAL)
                 
