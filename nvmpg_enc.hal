@@ -1,35 +1,38 @@
+# NVMPG Hal component
+# Note this version is setup for 3-axis, the NVMPG supports 6 axis.
+
+# Python component deals with serial communication and user space HAL
 loadusr -Wn nvmpg /home/martin/linuxcnc/configs/xyz_mill/nvmpg.py
 
 setp nvmpg.mpg-x1-inc 0.001
 
-net joint-1-pos-fb <= hm2_7i92.0.encoder.01.position
-
+# mux axis together 
 loadrt mux4 count=1
 
 addf mux4.0 servo-thread
 
+# The output from encoder counts is sent to ilowpass
 loadrt ilowpass
+# MESA encoder is used for jog wheel input 
+net mpg-out ilowpass.0.in <= hm2_7i92.0.encoder.02.count
 addf ilowpass.0 servo-thread
-
 setp ilowpass.0.scale 1000
 setp ilowpass.0.gain 0.01
+
 
 # Overrides
 net mpg-rapid-override nvmpg.rapid-override halui.rapid-override.value
 net mpg-spindle-override nvmpg.spindle-override halui.spindle.0.override.value
 net mpg-feed-override nvmpg.feed-override halui.feed-override.value
 
-# Spindle
-
+# Spindle RPM for display
 net spindle-rpm nvmpg.spindle-rpm <= spindle.0.speed-out-abs
 
-
-# postion
+# cordinate postion display
 net mpg-xpos halui.axis.x.pos-relative => nvmpg.x-pos
 net mpg-ypos halui.axis.y.pos-relative => nvmpg.y-pos
 net mpg-zpos halui.axis.z.pos-relative => nvmpg.z-pos
 #net mpg-apos halui.axis.a.pos-relative => nvmpg.a-pos
-
 
 # For velocity mode, set to 1
 # In velocity mode the axis stops when the dial is stopped
@@ -40,10 +43,6 @@ net mpg-zpos halui.axis.z.pos-relative => nvmpg.z-pos
 setp axis.x.jog-vel-mode 0
 setp axis.y.jog-vel-mode 0
 setp axis.z.jog-vel-mode 0
-
-
-# The output from encoder counts is sent to ilowpass
-net mpg-out ilowpass.0.in <= hm2_7i92.0.encoder.02.count
 
 # The output from the mux4 is sent to each axis jog scale
 net mpg-scale <= nvmpg.mpg-scale
