@@ -18,6 +18,7 @@ stat = linuxcnc.stat()
 cmd = linuxcnc.command()
 ## Constants
 JOINTCOUNT=3
+JOGSCALE=0.001 # on my machine mpg-jogscale is mm per one click of jog wheel in x1 mode. So on x1000 mode one full rotation moves 100mm
 MPGSCALEx1=0.00025
 MPGSCALEx10=0.0025
 MPGSCALEx100=0.025
@@ -26,8 +27,7 @@ MPGSCALEx1000=0.25
 print('starting')
 # inifile = linuxcnc.ini(os.environ['INI_FILE_NAME'])
 # trajcoordinates = inifile.find("TRAJ", "COORDINATES").lower().replace(" ","")
-# jointcount = int(inifile.find("KINS","JOINTS"))
-
+# JOINTCOUNT = int(inifile.find("KINS","JOINTS"))
 
 ### HAL Function Examples
 # value = hal.get_value("iocontrol.0.emc-enable-in")
@@ -108,13 +108,14 @@ def get_handlers(linuxcnc_stat, linucnc_cmd, commands, master):
 
 
 NVMPGinputs = ""
-# OUTPUTS
+# INITIAL OUTPUT VALUES
 selectedAxis = 0
-c['x-select'] = 1; c['y-select'] = 0; c['z-select'] = 0; c['a-select'] = 0
-selectedMultiplier = 2
-c['mpg-scale'] = MPGSCALEx100 * c['mpg-jogscale']
-              
+c['x-select'] = 1; c['y-select'] = 0; c['z-select'] = 0; #c['a-select'] = 0
 
+# Jog scale
+selectedMultiplier = 2 # x100 mode
+c['mpg-jogscale']=JOGSCALE
+c['mpg-scale'] = MPGSCALEx100 * c['mpg-jogscale']
 
 # INPUTS
 spindle_rpm = int(c['spindle-rpm'])
