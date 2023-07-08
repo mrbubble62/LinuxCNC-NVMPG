@@ -374,13 +374,12 @@ try:
             updateFlag = 1
             print(selectedMultiplier)
         
-        # gotoZ
+        # goto machine location (e.g manual tool change)
         if(mpgRxData.hex() == "07"):
             if ok_for_mdi() and is_all_homed():
                 cmd.mode(linuxcnc.MODE_MDI)
                 cmd.wait_complete() # wait until mode switch executed
-                cmd.mdi("G53 Z0")
-                cmd.mdi("G53 X400 Y475 Z0")
+                cmd.mdi("G28") # use value stored with G28.1
                 cmd.wait_complete()
                 cmd.mode(linuxcnc.MODE_MANUAL)
                 
