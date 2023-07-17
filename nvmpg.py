@@ -25,29 +25,6 @@ MPGSCALEx100=0.025
 MPGSCALEx1000=0.25
 
 print('starting')
-# inifile = linuxcnc.ini(os.environ['INI_FILE_NAME'])
-# trajcoordinates = inifile.find("TRAJ", "COORDINATES").lower().replace(" ","")
-# JOINTCOUNT = int(inifile.find("KINS","JOINTS"))
-
-### HAL Function Examples
-# value = hal.get_value("iocontrol.0.emc-enable-in")
-
-# hal.set_p("pinname","10")
-
-# you can make a signal name in python with:
-# hal.new_sig.(SIGNAME,hal.HAL_PIN_TYPE)
-# hal.new_sig("signalname",hal.HAL_BIT)
-
-# you can connect pin to signal in python with:
-# hal.connect(PINNAME,SIGNAME)
-
-###
-
-### TODO
-# hold spindle and jog to change override?
-# 
-
-
 
 def is_all_homed():
     stat.poll()
@@ -299,21 +276,7 @@ try:
         #One when the key is pressed down and another when it is released
         # button state is from the high nibble, x0_ is button down (logical 1), x8_ is button up (logical 0)
         buttonState = parse_byte(mpgRxData)
-        #print(buttonState)
-        #print(mpgRxData)
 
-        # # left button start/pause 
-        # if(mpgRxData.hex() == "0b"):
-        #     if(isRunning()): # interp-run
-        #        cmd.auto(linuxcnc.AUTO_PAUSE) 
-            
-        #   else: # THIS SEEMS LIKE A BAD IDEA
-        #     if stat.paused():
-        #         cmd.auto(linuxcnc.AUTO_RESUME)     
-        #     else:
-        #         print("stat:")
-        #         print(stat)
-        
         #eStop right button
         if(mpgRxData.hex() == "0a" or "0b"):
           cmd.abort()
